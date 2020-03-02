@@ -161,6 +161,7 @@ class Label(models.Model):
     text_color = models.CharField(max_length=7, default='#ffffff')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.text

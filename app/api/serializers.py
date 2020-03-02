@@ -56,7 +56,7 @@ class LabelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Label
-        fields = ('id', 'text', 'prefix_key', 'suffix_key', 'background_color', 'text_color')
+        fields = ('id', 'text', 'prefix_key', 'suffix_key', 'background_color', 'text_color', 'children', 'parent')
 
 
 class DocumentSerializer(serializers.ModelSerializer):

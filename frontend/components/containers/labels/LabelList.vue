@@ -3,6 +3,7 @@
     :value="selected"
     :headers="headers"
     :items="items"
+    :custom-sort="customSort"
     :search="search"
     :loading="loading"
     @input="updateSelected"
@@ -70,6 +71,21 @@
         </template>
       </v-edit-dialog>
     </template>
+    <template v-slot:item.parent="{ item }">
+      <v-edit-dialog>
+        <div>{{ parentName(item.parent) }}</div>
+        <template v-slot:input>
+          <v-select
+            :value="item.parent"
+            :items="parentCandidates(item)"
+            @change="handleUpdateLabel({ id: item.id, parent: $event })"
+            item-text="text"
+            item-value="id"
+            label="Parent"
+          />
+        </template>
+      </v-edit-dialog>
+    </template>
   </v-data-table>
 </template>
 
@@ -86,16 +102,23 @@ export default {
         {
           text: 'Name',
           align: 'left',
+          sortable: false,
           value: 'text'
         },
         {
           text: 'Shortkey',
+          sortable: false,
           value: 'suffix_key'
         },
         {
           text: 'Color',
           sortable: false,
           value: 'background_color'
+        },
+        {
+          text: 'Parent',
+          sortable: false,
+          value: 'parent'
         }
       ],
       colorRules,
@@ -131,6 +154,33 @@ export default {
 
     textColor(backgroundColor) {
       return idealColor(backgroundColor)
+    },
+
+    parentName(parentId) {
+      return parentId ? this.items.find(item => item.id === parentId).text : ''
+    },
+
+    parentCandidates(label) {
+      return this.items.filter(item => item.id !== label.id)
+    },
+
+    customSort(items) {
+      items.sort((a, b) => {
+        return a.text < b.text ? -1 : 1
+      })
+      const sorted = items.filter(item => item.parent === null)
+      const remaining = items.filter(item => item.parent !== null)
+      while (remaining.length > 0) {
+        const x = remaining.pop()
+        const i = sorted.findIndex(item => item.id === x.parent)
+        const found = i !== -1
+        if (found) {
+          sorted.splice(i + 1, 0, x)
+        } else {
+          remaining.splice(0, 0, x)
+        }
+      }
+      return sorted
     }
   }
 }

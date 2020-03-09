@@ -9,6 +9,26 @@ export const state = () => ({
 export const getters = {
   isLabelSelected(state) {
     return state.selected.length > 0
+  },
+  treeOptions(state) {
+    const options = []
+    const mappedArr = {}
+    let mappedElem
+
+    for (const item of state.items) {
+      mappedArr[item.id] = { id: item.id, label: item.text, parent: item.parent }
+      mappedArr[item.id].children = []
+    }
+
+    for (const id in mappedArr) {
+      mappedElem = mappedArr[id]
+      if (mappedElem.parent) {
+        mappedArr[mappedElem.parent].children.push(mappedElem)
+      } else {
+        options.push(mappedElem)
+      }
+    }
+    return options
   }
 }
 

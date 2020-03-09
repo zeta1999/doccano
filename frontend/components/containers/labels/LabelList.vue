@@ -3,7 +3,6 @@
     :value="selected"
     :headers="headers"
     :items="items"
-    :custom-sort="customSort"
     :search="search"
     :loading="loading"
     @input="updateSelected"
@@ -23,7 +22,7 @@
     </template>
     <template v-slot:item.text="{ item }">
       <v-edit-dialog>
-        {{ item.text }}
+        <span>{{ item.text }}</span>
         <template v-slot:input>
           <v-text-field
             :value="item.text"
@@ -161,7 +160,9 @@ export default {
     },
 
     parentCandidates(label) {
-      return this.items.filter(item => item.id !== label.id)
+      const items = this.items.filter(item => item.id !== label.id)
+      items.unshift({ id: null, text: 'None' }) // represents a root label
+      return items
     },
 
     customSort(items) {
@@ -177,10 +178,20 @@ export default {
         if (found) {
           sorted.splice(i + 1, 0, x)
         } else {
-          remaining.splice(0, 0, x)
+          remaining.unshift(x)
         }
       }
       return sorted
+    },
+
+    getPaddingSize(label) {
+      let indentLevel = 0
+      while (label.parent !== null) {
+        const parent = this.items.find(item => item.id === label.parent)
+        label = parent
+        indentLevel += 1
+      }
+      return indentLevel
     }
   }
 }

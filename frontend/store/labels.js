@@ -10,7 +10,7 @@ export const getters = {
   isLabelSelected(state) {
     return state.selected.length > 0
   },
-  treeOptions(state) {
+  parentOptions(state) {
     const options = []
     const mappedArr = {}
     let mappedElem

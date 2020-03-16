@@ -33,6 +33,11 @@
           label="Key"
           prepend-icon="mdi-keyboard"
         />
+        <treeselect
+          v-model="parentLabel"
+          :multiple="false"
+          :options="parentOptions"
+        />
         <v-color-picker
           v-model="color"
           :rules="colorRules"
@@ -50,15 +55,23 @@
 <script>
 import BaseCard from '@/components/molecules/BaseCard'
 import { colorRules, labelNameRules } from '@/rules/index'
+import Treeselect from '@riophae/vue-treeselect'
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
 export default {
   components: {
-    BaseCard
+    BaseCard,
+    Treeselect
   },
   props: {
     createLabel: {
       type: Function,
       default: () => {},
+      required: true
+    },
+    parentOptions: {
+      type: Array,
+      default: () => [],
       required: true
     },
     keys: {
@@ -72,6 +85,7 @@ export default {
       labelName: '',
       suffixKey: '',
       color: '',
+      parentLabel: null,
       labelNameRules,
       colorRules,
       showError: false
@@ -97,7 +111,8 @@ export default {
           prefix_key: null,
           suffix_key: this.suffixKey ? this.suffixKey : null,
           background_color: this.color.slice(0, 7), // #12345678 -> #123456
-          text_color: '#ffffff'
+          text_color: '#ffffff',
+          parent: this.parentLabel
         })
           .then(() => {
             this.reset()

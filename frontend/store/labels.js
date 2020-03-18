@@ -16,7 +16,7 @@ export const getters = {
     let mappedElem
 
     for (const item of state.items) {
-      mappedArr[item.id] = { id: item.id, label: item.text, parent: item.parent }
+      mappedArr[item.id] = item
       mappedArr[item.id].children = []
     }
 

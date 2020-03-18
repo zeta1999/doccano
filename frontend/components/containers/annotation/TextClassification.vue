@@ -2,14 +2,17 @@
   <v-card
     v-if="currentDoc && items"
     v-shortkey="multiKeys"
-    @shortkey="addOrRemoveLabel"
+    @shortkey="handleShortkey"
   >
     <v-card-title>
-      <multi-class-classification
-        :labels="items"
-        :annotations="currentDoc.annotations"
-        :add-label="addLabel"
-        :delete-label="removeLabel"
+      <hierarchical-classification
+        v-model="annotatedLabels"
+        :items="parentOptions"
+        :multiple="true"
+        @click:close="removeLabel"
+        item-text="text"
+        label="Label"
+        selection-type="independent"
       />
     </v-card-title>
     <v-card-text class="title">
@@ -21,16 +24,17 @@
 <script>
 import Vue from 'vue'
 import { mapActions, mapGetters, mapState } from 'vuex'
-import MultiClassClassification from '@/components/organisms/annotation/MultiClassClassification'
+import HierarchicalClassification from '@/components/organisms/annotation/HierarchicalClassification'
 Vue.use(require('vue-shortkey'))
 
 export default {
   components: {
-    MultiClassClassification
+    HierarchicalClassification
   },
 
   computed: {
     ...mapState('labels', ['items']),
+    ...mapGetters('labels', ['parentOptions']),
     ...mapGetters('documents', ['currentDoc']),
     multiKeys() {
       const multiKeys = {}
@@ -38,6 +42,19 @@ export default {
         multiKeys[item.id] = [item.suffix_key]
       }
       return multiKeys
+    },
+    annotatedLabels: {
+      get() {
+        const labelIds = this.currentDoc.annotations.map(item => item.label)
+        return this.items.filter(item => labelIds.includes(item.id))
+      },
+      set(newValue) {
+        const oldValue = this.annotatedLabels
+        const diffA = newValue.filter(x => !oldValue.includes(x))
+        const diffB = oldValue.filter(x => !newValue.includes(x))
+        const diff = diffA.concat(diffB)
+        this.changeLabels(diff)
+      }
     }
   },
 
@@ -50,36 +67,40 @@ export default {
   methods: {
     ...mapActions('labels', ['getLabelList']),
     ...mapActions('documents', ['getDocumentList', 'deleteAnnotation', 'updateAnnotation', 'addAnnotation']),
-    removeLabel(annotationId) {
+    removeLabel(label) {
+      const annotation = this.currentDoc.annotations.find(item => item.label === label.id)
       const payload = {
-        annotationId,
+        annotationId: annotation.id,
         projectId: this.$route.params.id
       }
       this.deleteAnnotation(payload)
     },
-    updateLabel(labelId, annotationId) {
+    addLabel(label) {
       const payload = {
-        annotationId,
-        label: labelId,
-        projectId: this.$route.params.id
-      }
-      this.updateAnnotation(payload)
-    },
-    addLabel(labelId) {
-      const payload = {
-        label: labelId,
+        label: label.id,
         projectId: this.$route.params.id
       }
       this.addAnnotation(payload)
     },
-    addOrRemoveLabel(event) {
-      const label = this.items.find(item => item.id === parseInt(event.srcKey, 10))
-      const annotation = this.currentDoc.annotations.find(item => item.label === label.id)
-      if (annotation) {
-        this.removeLabel(annotation.id)
-      } else {
-        this.addLabel(label.id)
+    changeLabels(labels) {
+      for (const label of labels) {
+        this.addOrRemoveLabel(label)
       }
+    },
+    addOrRemoveLabel(label) {
+      if (this.isAnnotatedLabel(label)) {
+        this.removeLabel(label)
+      } else {
+        this.addLabel(label)
+      }
+    },
+    handleShortkey(event) {
+      const label = this.items.find(item => item.id === parseInt(event.srcKey, 10))
+      this.addOrRemoveLabel(label)
+    },
+    isAnnotatedLabel(label) {
+      const annotation = this.currentDoc.annotations.filter(item => item.label === label.id)
+      return annotation.length !== 0
     }
   }
 }

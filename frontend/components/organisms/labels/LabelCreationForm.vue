@@ -33,10 +33,14 @@
           label="Key"
           prepend-icon="mdi-keyboard"
         />
-        <treeselect
-          v-model="parentLabel"
+        <v-tree-select
+          v-model="selected"
+          :items="parentOptions"
           :multiple="false"
-          :options="parentOptions"
+          item-text="text"
+          label="Select parent"
+          prepend-icon="mdi-folder"
+          selection-type="independent"
         />
         <v-color-picker
           v-model="color"
@@ -54,14 +58,13 @@
 
 <script>
 import BaseCard from '@/components/molecules/BaseCard'
+import VTreeSelect from '@/components/organisms/labels/VTreeSelect'
 import { colorRules, labelNameRules } from '@/rules/index'
-import Treeselect from '@riophae/vue-treeselect'
-import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
 export default {
   components: {
     BaseCard,
-    Treeselect
+    VTreeSelect
   },
   props: {
     createLabel: {
@@ -88,7 +91,8 @@ export default {
       parentLabel: null,
       labelNameRules,
       colorRules,
-      showError: false
+      showError: false,
+      selected: []
     }
   },
 

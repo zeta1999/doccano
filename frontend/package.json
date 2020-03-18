@@ -17,7 +17,6 @@
   "dependencies": {
     "@nuxtjs/axios": "^5.3.6",
     "@nuxtjs/vuetify": "^1.0.2",
-    "@riophae/vue-treeselect": "^0.4.0",
     "@toast-ui/vue-editor": "^1.1.1",
     "chart.js": "^2.8.0",
     "codemirror": "^5.48.2",

@@ -12,7 +12,6 @@
         @click:close="removeLabel"
         item-text="text"
         label="Label"
-        selection-type="independent"
       />
     </v-card-title>
     <v-card-text class="title">
